@@ -5,7 +5,11 @@ class ObservableGameStore {
   y = 0;
   gameField = [];
   score = 0;
+
+  scoreList = [];
+
   prevCard = null;
+  inputLock = false;
 
   constructor() {
     makeObservable(this, {
@@ -21,10 +25,10 @@ class ObservableGameStore {
       decreaseScore: action,
 
       flipCard: action,
+      flipAllCardsTo: action,
 
       isWin: computed,
     });
-    autorun(() => console.log(this.isWin));
   }
 
   get isWin() {
@@ -41,24 +45,41 @@ class ObservableGameStore {
 
   flipCard(id) {
     const card = this.gameField[id];
+
+    if (this.inputLock) {
+      return;
+    }
+
+    // flip card if it's not flipped
     if (!card.flip) {
       if (this.prevCard === null) {
         this.prevCard = card;
         card.flip = true;
         return;
       }
+
       card.flip = true;
-      console.log(card.image, this.prevCard.image)
+
+      // unflip cards if current card is not equal previous
       if (card.image !== this.prevCard.image) {
+        this.inputLock = true;
         setTimeout(() => {
+          this.decreaseScore(3);
           this.prevCard.flip = false;
           card.flip = false;
           this.prevCard = null;
+          this.inputLock = false;
         }, 1000);
         return;
       }
+      this.increaseScore(10);
       this.prevCard = null;
       return;
+    }
+  }
+  flipAllCardsTo(flip) {
+    for (let i = 0; i < this.gameField.length; ++i) {
+      this.gameField[i].flip = flip;
     }
   }
 
@@ -68,12 +89,12 @@ class ObservableGameStore {
 
   initGameField(x, y, images) {
     // params validation
-    // check if it's enough images for game field, and shrink if it's not
-    // if (images.length / 2 < x * y) {
-    //   if (x <= y) {
-    //     y = images.length / 2 / x;
-    //   }
-    // }
+    // check if it's enough images for game field, and shrink field if it's not
+    while (images.length * 2 < x * y) {
+      if (x <= y) {
+        y = Number(images.length / 2 / x);
+      }
+    }
 
     // check if game field is even and resize if not
     if ((x * y) % 2 !== 0) {
@@ -84,6 +105,7 @@ class ObservableGameStore {
       }
     }
 
+    console.log(x, y);
     const fieldSize = x * y;
 
     let imagesForCards = images.slice(0, fieldSize / 2);
@@ -95,6 +117,7 @@ class ObservableGameStore {
     });
 
     newGameField = newGameField.concat(newGameField);
+    console.log(newGameField);
 
     let rand, temp, i;
     for (i = newGameField.length - 1; i > 0; i--) {
@@ -116,6 +139,9 @@ class ObservableGameStore {
     this.score += points;
   }
   decreaseScore(points) {
+    if (this.score - points < 0) {
+      return
+    }
     this.score -= points;
   }
   setScore(points) {

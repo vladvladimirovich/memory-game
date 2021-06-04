@@ -1,0 +1,11 @@
+.score {
+    color: rgb(13, 95, 13);
+}
+
+.win {
+    position: absolute;
+    vertical-align: middle;
+    
+    z-index: 2;
+    color: #b8bb26;
+}
