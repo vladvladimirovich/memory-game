@@ -1,20 +1,17 @@
 import { Route, Switch } from "react-router-dom";
-import { BrowserRouter as Router } from "react-router-dom";
 import Game from "./game-page/Game";
 import Main from "./main-page/Main";
-import Score from "./score-page/Score";
+import ScoreList from "./score-page/ScoreList";
 
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <Switch>
-          <Route path="/game" component={Game}></Route>
-          <Route path="/score" component={Score}></Route>
-          <Route path="/" component={Main}></Route>
-        </Switch>
-      </div>
-    </Router>
+    <div className="app">
+      <Switch>
+        <Route path="/game" component={Game}></Route>
+        <Route path="/score" component={ScoreList}></Route>
+        <Route path="/" component={Main}></Route>
+      </Switch>
+    </div>
   );
 }
 

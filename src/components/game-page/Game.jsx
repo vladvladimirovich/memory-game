@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import { Redirect } from "react-router-dom";
 import Score from "./Score";
 import GameField from "./GameField";
 import styles from "./styles/game.module.css";
@@ -9,10 +10,14 @@ import images from "../../img/game-cards/images";
 const Game = observer(({ history }) => {
   useEffect(() => {
     store.initGameField(4, 3, images);
-    setTimeout(() => store.flipAllCardsTo(true), 500)
-    setTimeout(() => store.flipAllCardsTo(false), 3000);
   }, []);
 
+  const isWin = store.isWin;
+  console.log("isWin", isWin);
+
+  if (isWin) {
+    return <Redirect to="/score"></Redirect>;
+  }
 
   return (
     <div className={styles.game}>

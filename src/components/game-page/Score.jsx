@@ -1,11 +1,6 @@
+function Score(params) {
+  const score = params.points;
 
-function Score(props) {
-  const points = props.points;
-
-  return (
-    <div>
-      <h1>Score: {points}</h1>
-    </div>
-  );
+  return <h1>Score: {score}</h1>;
 }
 export default Score;

@@ -1,4 +1,5 @@
-import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
+import { loadFromIndexedDB, saveToIndexedDB } from "./indexedDBHelpers";
 
 class ObservableGameStore {
   x = 0;
@@ -10,29 +11,44 @@ class ObservableGameStore {
 
   prevCard = null;
   inputLock = false;
-
+  winLock = true;
   constructor() {
     makeObservable(this, {
       gameField: observable,
       score: observable,
-
+      winLock: observable,
       setGameField: action,
       initGameField: action,
-
-      getScore: action,
+      getScore: computed,
       setScore: action,
       increaseScore: action,
       decreaseScore: action,
-
       flipCard: action,
       flipAllCardsTo: action,
-
       isWin: computed,
+      addToScoreList: action,
+      setScoreList: action,
+      getScoreList: computed,
     });
   }
 
+  async addToScoreList(user) {
+    await saveToIndexedDB("usersScore", user);
+  }
+
+  async setScoreList() {
+    this.scoreList = await loadFromIndexedDB("usersScore");
+    console.log(this.scoreList);
+  }
+
+  get getScoreList() {
+    return this.scoreList;
+  }
+
   get isWin() {
-    console.log("isWIN");
+    if (this.winLock) {
+      return false;
+    }
     let win = true;
     for (let i = 0; i < this.gameField.length; ++i) {
       if (this.gameField[i].flip === false) {
@@ -130,9 +146,15 @@ class ObservableGameStore {
     this.gameField = newGameField;
     this.x = x;
     this.y = y;
+
+    setTimeout(() => this.flipAllCardsTo(true), 500);
+    setTimeout(() => {
+      this.flipAllCardsTo(false);
+      this.winLock = false;
+    }, 3000);
   }
 
-  getScore() {
+  get getScore() {
     return this.score;
   }
   increaseScore(points) {
@@ -140,7 +162,7 @@ class ObservableGameStore {
   }
   decreaseScore(points) {
     if (this.score - points < 0) {
-      return
+      return;
     }
     this.score -= points;
   }
